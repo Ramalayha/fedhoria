@@ -1,0 +1,6 @@
+{
+	"title"		:	"Fedhoria",
+	"type"		:	"effects",
+	"tags"		:	[ "fun", "comic" ],
+	"ignore"	:	[ ".git/*" ]
+}

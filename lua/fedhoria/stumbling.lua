@@ -55,6 +55,12 @@ local function PhysicsSim(self, phys, dt)
 		return
 	end
 
+	local vel = target:GetPhysicsObjectNum(0):GetVelocity()
+	if (vel:LengthSqr() < 150) then
+		self:Remove()		
+		return false
+	end
+
 	if target.LastCollide then
 		local delta = CurTime() - target.LastCollide
 		if (delta < 0.2) then
