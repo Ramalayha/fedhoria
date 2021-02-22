@@ -25,6 +25,8 @@ local function PhysicsCollide(self, data)
 		return
 	end
 	
+	if (data.HitNormal.z > -0.6) then return end
+
 	self.LastCollide = CurTime()
 end
 
@@ -39,9 +41,9 @@ local function PhysicsSim(self, phys, dt)
 	local phys_bone = phys:GetID()
 
 	local vel = phys:GetVelocity()
-	if (vel:LengthSqr() < 80) then
+	if (!self.DieTime and CurTime() - self.Created > 1 and vel:LengthSqr() < 150) then
 		if (phys_bone == self.root_phys_bone) then
-			self:Remove()
+			self.DieTime = CurTime()
 		end
 		return false
 	end
@@ -54,6 +56,32 @@ local function PhysicsSim(self, phys, dt)
 			return false
 		elseif (delta < 1) then
 			return true, delta
+		end
+	end
+
+	if self.is_torso then
+		if (!self.DieTime and target:WaterLevel() > 0) then
+			self:ResetSequence(self:LookupSequence("Choked_Barnacle"))
+			self.DieTime = CurTime()
+			timer.Simple(0.5, function()
+				if !IsValid(target) then return end
+				SafeRemoveEntity(self)
+				local bone_lhand = target:LookupBone("ValveBiped.Bip01_L_Hand")
+				if bone_lhand then
+					local phys_bone_lhand = target:TranslateBoneToPhysBone(bone_lhand)
+					local const = constraint.Elastic(target, target, phys_bone_lhand, target.phys_bone_head, vector_origin, vector_origin, 500, 0, 0, "", 0, false)
+					const:Fire("SetSpringLength", 0, 0)
+					SafeRemoveEntityDelayed(const, 5)
+				end
+
+				local bone_rhand = target:LookupBone("ValveBiped.Bip01_R_Hand")
+				if bone_rhand then
+					local phys_bone_rhand = target:TranslateBoneToPhysBone(bone_rhand)
+					local const = constraint.Elastic(target, target, phys_bone_rhand, target.phys_bone_head, vector_origin, vector_origin, 500, 0, 0, "", 0, false)
+					const:Fire("SetSpringLength", 0, 0)
+					SafeRemoveEntityDelayed(const, 5)
+				end
+			end)
 		end
 	end
 
@@ -100,6 +128,8 @@ function Fedh_DoFallingAnim(ent)
 	contr_torso:Spawn()
 
 	contr_torso:ResetSequence(contr_torso:LookupSequence("idleonfire"))
+
+	contr_torso.is_torso = true
 
 	ent.phys_bone_head = ent:TranslateBoneToPhysBone(ent:LookupBone("ValveBiped.Bip01_Head1") or -1) or -1
 	

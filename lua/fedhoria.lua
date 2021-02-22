@@ -38,6 +38,12 @@ local function CreateRagdoll(self)
 	ragdoll:SetAngles(self:GetAngles())
 	ragdoll:Spawn()
 
+	ragdoll:SetSkin(self:GetSkin())
+
+	for i = 0, self:GetNumBodyGroups() - 1 do
+		ragdoll:SetBodygroup(i, self:GetBodygroup(i))
+	end
+
 	for i = 0, ragdoll:GetPhysicsObjectCount()-1 do
 		local phys = ragdoll:GetPhysicsObjectNum(i)
 		local bone = ragdoll:TranslatePhysBoneToBone(i)

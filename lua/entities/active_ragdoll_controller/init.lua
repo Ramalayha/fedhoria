@@ -211,10 +211,10 @@ function ENT:PhysicsSimulate(phys, dt)
 
 		if self.DieTime then
 			local delta = CurTime() - self.DieTime
-			if (delta > 3) then
+			if (delta > 5) then
 				self:Remove()
 			else
-				ang_vel:Mul(1 - delta / 3)
+				ang_vel:Mul(1 - delta / 5)
 			end
 		elseif (target.GS2IsDismembered and target:GS2IsDismembered(1)) then
 			self.DieTime = CurTime()

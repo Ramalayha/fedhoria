@@ -40,6 +40,11 @@ local function PhysicsCollide(self, data)
 
 	if !table.HasValue(self.allowed_to_collide, bone) then
 		self.LastCollide = CurTime()
+	elseif self:GetBoneName(bone):find("Foot") then
+		--[[timer.Simple(0, function()
+			local const = constraint.Weld(self, data.HitEntity, phys_bone, phys_bone, 1000)
+			SafeRemoveEntityDelayed(const, 0)
+		end)]]
 	end
 end
 
@@ -56,7 +61,7 @@ local function PhysicsSim(self, phys, dt)
 	end
 
 	local vel = target:GetPhysicsObjectNum(0):GetVelocity()
-	if (vel:LengthSqr() < 150) then
+	if (CurTime() - self.Created > 1 and vel:LengthSqr() < 150) then
 		self:Remove()		
 		return false
 	end
@@ -91,9 +96,13 @@ local function PhysicsSim(self, phys, dt)
 
 		local offset = pos - self.last_root_pos
 		
-		local dot = target:GetForward():Dot(offset)
+		local a = target:GetAngles()
+		a.p = 0
+		a.y = 0
 
-		local pbr = math.Clamp(dot/50, -2, 2)
+		local dot = a:Forward():Dot(offset)
+
+		local pbr = math.Clamp(dot/20, -2, 2)
 
 		self:SetPlaybackRate(pbr)
 		
@@ -102,9 +111,9 @@ local function PhysicsSim(self, phys, dt)
 		vel.x = 0
 		vel.y = 0
 
-		vel.z = vel.z * (1 - math.min(1, offset:Length2D() / 50)) * math.max(0, 1 - (CurTime() - self.Created))
+		vel.z = vel.z * (1 - math.min(1, offset:Length2D() / 80)) * math.max(0, 1 - (CurTime() - self.Created))
 
-		phys:ApplyForceCenter(-vel * phys:GetMass() * 0.9)
+		phys:ApplyForceCenter(-vel * phys:GetMass() * 0.99)
 
 		--return false
 	end
@@ -178,15 +187,17 @@ local function GetClosestPhysBone(self, pos, target_phys_bone, use_collides)
 			--Vector, Vector, number PhysCollide:TraceBox( Vector origin, Angle angles, Vector rayStart, Vector rayEnd, Vector rayMins, Vector rayMaxs )
 			local phys = self:GetPhysicsObjectNum(phys_bone)
 			if (use_collides and collides) then
-				local collide = collides[phys_bone + 1]				
-				local phys_pos = phys:GetPos()
-				local phys_ang = phys:GetAngles()
-				local lpos = phys:WorldToLocal(pos)
-				local hitpos, _, d = collide:TraceBox(phys_pos, phys_ang, pos, pos, vec_min, vec_max)
-				if hitpos then					
-					if (d < dist) then
-						dist = d
-						closest_bone = phys_bone	
+				local collide = collides[phys_bone + 1]	
+				if IsValid(collide) then			
+					local phys_pos = phys:GetPos()
+					local phys_ang = phys:GetAngles()
+					local lpos = phys:WorldToLocal(pos)
+					local hitpos, _, d = collide:TraceBox(phys_pos, phys_ang, pos, pos, vec_min, vec_max)
+					if hitpos then					
+						if (d < dist) then
+							dist = d
+							closest_bone = phys_bone	
+						end
 					end
 				end
 			else
