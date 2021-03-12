@@ -98,19 +98,24 @@ function MODULE:PhysicsSimulate(phys, dt)
 				if bone_head then
 					local phys_bone_head = target:TranslateBoneToPhysBone(bone_head)
 					local phys_head = target:GetPhysicsObjectNum(phys_bone_head)
+					if IsValid(phys_head) then
+						local bone_lhand = target:LookupBone("ValveBiped.Bip01_L_Hand")
+						if bone_lhand then
+							local phys_bone_lhand = target:TranslateBoneToPhysBone(bone_lhand)
+							local phys_lhand = target:GetPhysicsObjectNum(phys_bone_lhand)	
+							if IsValid(phys_lhand) then
+								SafeRemoveEntityDelayed(CreateSpring(phys_head, phys_lhand, 500), die_time:GetFloat())
+							end
+						end
 
-					local bone_lhand = target:LookupBone("ValveBiped.Bip01_L_Hand")
-					if bone_lhand then
-						local phys_bone_lhand = target:TranslateBoneToPhysBone(bone_lhand)
-						local phys_lhand = target:GetPhysicsObjectNum(phys_bone_lhand)				
-						SafeRemoveEntityDelayed(CreateSpring(phys_head, phys_lhand, 500), die_time:GetFloat())
-					end
-
-					local bone_rhand = target:LookupBone("ValveBiped.Bip01_R_Hand")
-					if bone_rhand then
-						local phys_bone_rhand = target:TranslateBoneToPhysBone(bone_rhand)
-						local phys_rhand = target:GetPhysicsObjectNum(phys_bone_rhand)				
-						SafeRemoveEntityDelayed(CreateSpring(phys_head, phys_rhand, 500), die_time:GetFloat())
+						local bone_rhand = target:LookupBone("ValveBiped.Bip01_R_Hand")
+						if bone_rhand then
+							local phys_bone_rhand = target:TranslateBoneToPhysBone(bone_rhand)
+							local phys_rhand = target:GetPhysicsObjectNum(phys_bone_rhand)	
+							if IsValid(phys_rhand) then			
+								SafeRemoveEntityDelayed(CreateSpring(phys_head, phys_rhand, 500), die_time:GetFloat())
+							end
+						end
 					end
 				end
 			end)					

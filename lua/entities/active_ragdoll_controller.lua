@@ -117,7 +117,6 @@ function ENT:Initialize()
 		 		local phys_bone = target:TranslateBoneToPhysBone(bone)
 		 		local phys = target:GetPhysicsObjectNum(phys_bone)
 		 		if IsValid(phys) then
-			 		phys:SetMass(info.mass)
 			 		phys:SetInertia(info.inertia)
 			 	end
 			end
@@ -134,23 +133,25 @@ function ENT:Initialize()
 		if bone then
 			is_match = true				
 			local phys_bone = target:TranslateBoneToPhysBone(bone)
-			bone = target:TranslatePhysBoneToBone(phys_bone)
-
-			self.root_bone = self.root_bone or bone
-			self.root_phys_bone = self.root_phys_bone or phys_bone
-
 			local phys = target:GetPhysicsObjectNum(phys_bone)
-			self:AddToMotionController(phys)
-			self.bone_translate[bone] = self:LookupBone(bone_name)
+			if IsValid(phys) then
+				bone = target:TranslatePhysBoneToBone(phys_bone)
 
-			local bone_parent = target:GetBoneParent(bone)
-			bone_parent = target:TranslateBoneToPhysBone(bone_parent)
-			bone_parent = target:TranslatePhysBoneToBone(bone_parent)
-			local bone_name_parent = target:GetBoneName(bone_parent)
+				self.root_bone = self.root_bone or bone
+				self.root_phys_bone = self.root_phys_bone or phys_bone
 
-			self.bone_parent[bone] = bone_parent
+				self:AddToMotionController(phys)
+				self.bone_translate[bone] = self:LookupBone(bone_name)
 
-			self.bone_translate[bone_parent] = self:LookupBone(bone_name_parent)
+				local bone_parent = target:GetBoneParent(bone)
+				bone_parent = target:TranslateBoneToPhysBone(bone_parent)
+				bone_parent = target:TranslatePhysBoneToBone(bone_parent)
+				local bone_name_parent = target:GetBoneName(bone_parent)
+
+				self.bone_parent[bone] = bone_parent
+
+				self.bone_translate[bone_parent] = self:LookupBone(bone_name_parent)
+			end
 		end
 	end
 
