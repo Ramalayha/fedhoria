@@ -4,6 +4,8 @@ local enabled 	= CreateConVar("fedhoria_enabled", 1, bit.bor(FCVAR_ARCHIVE, FCVA
 local players 	= CreateConVar("fedhoria_players", 1, bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED))
 local npcs 		= CreateConVar("fedhoria_npcs", 1, bit.bor(FCVAR_ARCHIVE, FCVAR_REPLICATED))
 
+util.AddNetworkString("Fedhoria.SetRagdollColor")
+
 local last_dmgpos = {}
 
 hook.Add("CreateEntityRagdoll", "Fedhoria", function(ent, ragdoll)
@@ -92,6 +94,17 @@ local function CreateRagdoll(self)
 	ragdoll:Spawn()
 
 	ragdoll:SetSkin(self:GetSkin())
+
+	ragdoll.GetPlayerColor = function()
+		return self:GetPlayerColor()
+	end
+
+	timer.Simple(0.1, function()
+		net.Start("Fedhoria.SetRagdollColor")
+			net.WriteEntity(self)
+			net.WriteEntity(ragdoll)
+		net.Broadcast()
+	end)
 
 	for i = 0, self:GetNumBodyGroups() - 1 do
 		ragdoll:SetBodygroup(i, self:GetBodygroup(i))
